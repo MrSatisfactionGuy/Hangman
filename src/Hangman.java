@@ -1,13 +1,40 @@
 
+import com.sun.source.tree.ArrayAccessTree;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Hangman {
 
     public static void main(String[] args) {
 
-        String word = "pizza";
+        String filePath = "src/woerter.txt";
+        ArrayList<String> woerterListe = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                woerterListe.add(line.trim());
+            }
+
+            for (String w : woerterListe) {
+                System.out.println("[" + w + "] length=" + w.length());
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Datei nicht gefunden");
+        } catch (IOException e) {
+            System.out.println("Irgendwas ist schiefgegangen beim Einlesen...");
+        }
+
+        Random rd = new Random();
+
+        String word = woerterListe.get(rd.nextInt(woerterListe.size()));
 
         Scanner sc = new Scanner(System.in);
         ArrayList<Character> wordstate = new ArrayList<>();
@@ -35,17 +62,16 @@ public class Hangman {
             System.out.println("Gebe eine Zeichen ein: ");
             char guess = sc.next().toLowerCase().charAt(0);
 
-            if (word.indexOf(guess) >= 0) {
+            if (word.toLowerCase().indexOf(Character.toLowerCase(guess)) >= 0) {
                 System.out.println("Gut geraten!");
 
                 for (int i = 0; i < word.length(); i++) {
-                    if (word.charAt(i) == guess) {
+                    if (Character.toLowerCase(word.charAt(i)) == Character.toLowerCase(guess)) {
                         wordstate.set(i, guess);
                     }
                 }
 
-                if (!wordstate.contains('_'))
-                {
+                if (!wordstate.contains('_')) {
                     System.out.print(getHangmanArt(wrongGuesses));
                     System.out.println("*** Gewonnen! ***");
                     System.out.printf("Das zu ratende Wort ist: '%s'!.\n", word);
@@ -58,8 +84,7 @@ public class Hangman {
             }
         }
 
-        if(wrongGuesses >= 6)
-        {
+        if (wrongGuesses >= 6) {
             System.out.print(getHangmanArt(wrongGuesses));
             System.out.println("*** Spiel zu Ende ***");
             System.out.printf("Das zu ratende Wort wäre: '%s' gewesen.\n", word);
